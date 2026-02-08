@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CyberScript</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<style>
+:root{
+  --bg:#000;
+  --text:#00ff66;
+  --accent:#00ff66;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Courier New", monospace;
+  overflow:hidden;
+  touch-action:manipulation;
+}
+
+/* Transparent scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.15);
+  border-radius:10px;
+}
+
+/* Scanlines */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.03),
+    rgba(255,255,255,.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events:none;
+}
+
+/* Hidden mobile input */
+#mobileInput{
+  position:fixed;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ERROR MODE */
+.error{
+  --bg:#120000;
+  --text:#ff3333;
+  --accent:#ff3333;
+}
+
+/* BOOT */
+#boot{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  padding:20px;
+  text-align:center;
+}
+
+#boot h1{
+  font-size:clamp(32px,8vw,48px);
+  letter-spacing:6px;
+}
+
+#progress{
+  width:80%;
+  max-width:360px;
+  height:8px;
+  border:1px solid var(--accent);
+}
+#bar{
+  height:100%;
+  width:0%;
+  background:var(--accent);
+}
+
+#bootLogs{
+  max-width:650px;
+  width:100%;
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre-wrap;
+}
+
+/* Recovery */
+#recovery{
+  display:none;
+  width:100%;
+  max-width:650px;
+  border:1px solid var(--accent);
+  padding:12px;
+  margin-top:10px;
+}
+
+/* TOP BAR */
+#top{
+  position:fixed;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:6px;
+  z-index:5;
+}
+
+select,button{
+  background:transparent;
+  border:1px solid var(--accent);
+  color:var(--text);
+  padding:6px 10px;
+  font-family:inherit;
+  cursor:pointer;
+}
+
+/* TERMINAL */
+#terminal{
+  display:none;
+  height:100vh;
+  padding:16px;
+  font-size:15px;
+  line-height:1.9;
+  white-space:pre-wrap;
+  overflow-y:auto;
+}
+
+/* Cursor */
+.cursor{
+  display:inline-block;
+  width:10px;
+  background:var(--accent);
+  animation:blink 1s infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* INFO */
+#info{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+#infoBox{
+  border:1px solid var(--accent);
+  padding:20px;
+  max-width:420px;
+}
+
+/* Creator animation */
+.creator span{
+  display:inline-block;
+  animation:float 2.5s infinite ease-in-out;
+}
+.creator span:nth-child(even){animation-delay:.3s}
+@keyframes float{
+  50%{transform:translate(-2px,2px) rotate(-2deg);opacity:.7}
+}
+
+/* Mobile hint */
+#tapHint{
+  position:fixed;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:12px;
+  opacity:.6;
+}
+</style>
+</head>
+<body>
+
+<input id="mobileInput" autocomplete="off" />
+
+<div id="boot">
+  <h1>CyberScript</h1>
+  <div id="progress"><div id="bar"></div></div>
+  <div id="bootLogs"></div>
+
+  <div id="recovery">
+    ENTER KENTAL CODE:
+    <div>&gt; <span id="typed"></span><span class="cursor"></span></div>
+  </div>
+</div>
+
+<div id="top">
+  <select id="theme">
+    <option value="0">Classic</option>
+    <option value="1">White Hat</option>
+    <option value="2">Amber</option>
+    <option value="3">Neon Ice</option>
+    <option value="4">Purple</option>
+  </select>
+  <button onclick="toggleSound()">🔊</button>
+  <button onclick="toggleInfo()">?</button>
+</div>
+
+<div id="terminal">
+IP: 10.22.91.44 | SESSION: F9A3D2 
+CPU: Ryzen 9 7950X (<span id="cpu">18%</span>)
+GPU: RTX 4090 (<span id="gpu">21%</span>)
+RAM: 32GB DDR5 (<span id="ram">42%</span>)
+
+<span class="cursor"></span>
+</div>
+
+<div id="tapHint">Tap anywhere to type</div>
+
+<div id="info" onclick="toggleInfo()">
+  <div id="infoBox" onclick="event.stopPropagation()">
+    <h3>CyberScript</h3>
+    <p>Creator:</p>
+    <div class="creator">
+      <span>S</span><span>a</span><span>h</span><span>i</span><span>l</span>
+      &nbsp;
+      <span>B</span><span>a</span><span>b</span><span>a</span><span>r</span>
+    </div>
+    <p>AI Assistance: ChatGPT</p>
+    <button onclick="toggleInfo()">Close</button>
+  </div>
+</div>
+
+<audio id="sound" preload="auto">
+<source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAA==" />
+</audio>
+
+<script>
+/* Mobile focus */
+const mobileInput=document.getElementById("mobileInput");
+document.body.addEventListener("click",()=>mobileInput.focus());
+
+/* THEMES */
+const themes=[
+ {bg:"#000",text:"#00ff66",accent:"#00ff66"},
+ {bg:"#f5f5f5",text:"#000",accent:"#000"},
+ {bg:"#1a1200",text:"#ffb000",accent:"#ffb000"},
+ {bg:"#020b1c",text:"#aef",accent:"#aef"},
+ {bg:"#0b0014",text:"#bb00ff",accent:"#bb00ff"}
+];
+theme.onchange=e=>{
+ const t=themes[e.target.value];
+ document.documentElement.style.setProperty("--bg",t.bg);
+ document.documentElement.style.setProperty("--text",t.text);
+ document.documentElement.style.setProperty("--accent",t.accent);
+};
+
+/* BOOT */
+const errorMode=Math.random()<0.5;
+let p=0,input="",recovering=false;
+const logs=bootLogs,bar=document.getElementById("bar");
+
+const okLogs=["[ OK ] Kernel initialized","[ OK ] GPU online","[ OK ] Secure memory mapped"];
+const failLogs=["[FAIL] Watchdog timeout","[PANIC] Memory corruption","[HALT] Secure enclave locked","[FAIL] Secure Login failed", "[FAILSAFE] FAILSAFE:GROUNDLEVEL9 FAILED EMERGENCY KERNEL TERMINAL PANEL OPENED"];
+
+const bootInt=setInterval(()=>{
+ p+=4; bar.style.width=p+"%";
+ if(!errorMode && okLogs.length) logs.textContent+=okLogs.shift()+"\n";
+ if(errorMode && p>=50 && !recovering){
+  document.body.classList.add("error");
+  logs.textContent+=failLogs.join("\n")+"\n";
+  recovery.style.display="block";
+  recovering=true;
+  clearInterval(bootInt);
+ }
+ if(p>=100 && !errorMode){
+  clearInterval(bootInt);
+  boot.style.display="none";
+  terminal.style.display="block";
+ }
+},90);
+
+/* INPUT HANDLER (DESKTOP + MOBILE) */
+mobileInput.addEventListener("input",()=>{
+ const v=mobileInput.value;
+ mobileInput.value="";
+
+ if(recovering){
+  input+=v;
+  typed.textContent=input;
+  if(input==="CyberS9"){
+    logs.textContent+="\n[ RECOVERED ]\n";
+    document.body.classList.remove("error");
+    setTimeout(()=>{
+      boot.style.display="none";
+      terminal.style.display="block";
+    },800);
+    recovering=false;
+  }
+  return;
+ }
+ typeFast();
+});
+
+/* MAIN TYPING */
+const code=[
+"kernel: hardened memory protections enabled",
+"gpu: dma remap active on all channels",
+"secureboot: signature verified",
+"network: encrypted tunnel established",
+"watchdog: CPU stabilized",
+"System Config: 78P",
+"Intel core i910: Break, LOGIC 9J",
+"Terminal /run",
+"Terminal/run/commands_Panel",
+"Readable file: properties, set = 9872UI",
+"Set UI layout, Prompt: En_F8",
+"Cross reference.folder.setup",
+"Network/inbred : set_inbred_type, 12F"
+
+];
+let cur="",ci=0;
+const snd=document.getElementById("sound");
+let soundOn=true;
+
+function typeFast(){
+ for(let n=0;n<4;n++){
+  if(ci>=cur.length){
+    cur=code[Math.floor(Math.random()*code.length)]+"\n\n";
+    ci=0;
+  }
+  terminal.innerHTML=terminal.innerHTML.replace(/<span class="cursor"><\/span>/,"")
+   +cur[ci++]+'<span class="cursor"></span>';
+ }
+ terminal.scrollTop=terminal.scrollHeight;
+ if(soundOn){snd.currentTime=0;snd.play();}
+}
+
+/* STATS */
+setInterval(()=>{
+ cpu.textContent=Math.floor(Math.random()*30+10)+"%";
+ gpu.textContent=Math.floor(Math.random()*40+15)+"%";
+ ram.textContent=Math.floor(Math.random()*30+35)+"%";
+},1200);
+
+function toggleSound(){soundOn=!soundOn}
+function toggleInfo(){info.style.display=info.style.display==="flex"?"none":"flex"}
+</script>
+</body>
+</html>
